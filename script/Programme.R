@@ -158,7 +158,7 @@ dag_ini = matrix(c(    "Age", "Education level",
 dagg_ini = empty.graph(names(datad))
 arcs(dagg_ini)=dag_ini
 
-jpeg("../figures/DAC/DAG_ini.jpg", width = 800, height = "800")
+jpeg("../figures/DAC/0.DAG_ini.jpg", width = 800, height = "800")
 graphviz.plot(dagg_ini, 
               main = "Initial network",
               shape="rectangle", 
@@ -217,7 +217,7 @@ dag_final = matrix(c( "Age", "Education level",
 dagg_final = empty.graph(names(datad))
 arcs(dagg_final)=dag_final
 
-jpeg("../figures/DAC/DAG_final.jpg", width = 800, height = "800")
+jpeg("../figures/DAC/0.DAG_final.jpg", width = 800, height = "800")
 graphviz.plot(dagg_final, 
               main = "Final network",
               shape="rectangle", 
@@ -226,7 +226,7 @@ graphviz.plot(dagg_final,
                 nodes="Direct access to care"))
 dev.off()
 
-jpeg("../figures/DAC/DAG_ini_to_final.jpg", width = 800, height = "600")
+jpeg("../figures/DAC/0.DAG_ini_to_final.jpg", width = 800, height = "600")
 set.seed(12345)
 graphviz.plot(dagg_ini, 
               main = "",
@@ -289,7 +289,7 @@ dev.off()
 arcs.iamb_3 = arcs.iamb[(arcs.iamb$strength >=0.00), ]
 arrows_table.iamb = subset(arcs.iamb_3,from=="Direct access to care" | to=="Direct access to care")
 arrows_table.iamb %>%  
-  writexl::write_xlsx(.,"../figures/DAC/Hill_climbing_DataDriven.xlsx")
+  writexl::write_xlsx(.,"../figures/DAC/IAMB_DataDriven.xlsx")
 
 ### ARACNE -----
 
@@ -365,48 +365,21 @@ arcs.hc2 = boot.strength(as.data.frame(datad),
                         algorithm = "hc",
                         R=1000, 
                         algorithm.args = list(score="bic", blacklist = bl))
-arcs.hc2= arcs.hc2[(arcs.hc2$strength >=0.05), ]
-avg.arcs.hc2 = averaged.network(arcs.hc2, threshold=0.05)
+arcs.hc_2.2= arcs.hc2[(arcs.hc2$strength >=0.05), ]
+avg.arcs.hc_2.2 = averaged.network(arcs.hc_2.2, threshold=0.05)
 
-strength.plot(avg.arcs.hc2,arcs.hc2, 
+jpeg("../figures/DAC/Hill_climbing_Constrained.jpg",width = 800, height = "600")
+strength.plot(avg.arcs.hc_2.2,arcs.hc_2.2, 
+              fontsize = 15,
               shape="rectangle",
               highlight = list(#arcs = dag2,#
                 nodes="Direct access to care"))
+dev.off()
 
-
-arrows_table = subset(arcs.hc2,from=="Direct access to care" | to=="Direct access to care")
-arrows_table= kable(arrows_table, 
-                    row.names=FALSE, 
-                    booktabs = T,
-                    linesep = "", 
-                    caption ="Strength and direction of the arcs connected to 'DAC'")
-kable_styling(arrows_table, 
-              font_size = 8,
-              latex_options = "hold_position")
-
-set.seed(12345)
-arcs.hc2 = boot.strength(as.data.frame(datad), 
-                         algorithm = "hc",
-                         R=1000, 
-                         algorithm.args = list(score="bic", blacklist = bl))
-arcs.hc2= arcs.hc2[(arcs.hc2$strength >=0.0), ]
-avg.arcs.hc2 = averaged.network(arcs.hc2, threshold=0.0)
-
-strength.plot(avg.arcs.hc2,arcs.hc2, 
-              shape="rectangle",
-              highlight = list(#arcs = dag2,#
-                nodes="Direct access to care"))
-
-
-arrows_table = subset(arcs.hc2,from=="Direct access to care" | to=="Direct access to care")
-arrows_table= kable(arrows_table, 
-                    row.names=FALSE, 
-                    booktabs = T,
-                    linesep = "", 
-                    caption ="Strength and direction of the arcs connected to 'DAC'")
-kable_styling(arrows_table, 
-              font_size = 13,
-              latex_options = "hold_position")
+arcs.hc_3.2= arcs.hc2[(arcs.hc2$strength >=0.0), ]
+arrows_table.hc.2 = subset(arcs.hc_3.2,from=="Direct access to care" | to=="Direct access to care")
+arrows_table.hc.2 %>%  
+  writexl::write_xlsx(.,"../figures/DAC/Hill_climbing_Constrained.xlsx")
 
 ### Interleaved Incremental Association -----
 
@@ -415,37 +388,26 @@ arcs.iamb2 = boot.strength(as.data.frame(datad),
                           algorithm = "inter.iamb",
                           R=1000,
                           algorithm.args = list(blacklist = bl))
-arcs.iamb2 = arcs.iamb2[(arcs.iamb2$strength >=0.05), ]
-avg.arcs.iamb2 = averaged.network(arcs.iamb2, threshold=0.05)
+arcs.iamb_2.2 = arcs.iamb2[(arcs.iamb2$strength >=0.05), ]
+avg.arcs.iamb2_2. = averaged.network(arcs.iamb_2.2, threshold=0.05)
 
-
-strength.plot(avg.arcs.iamb2,arcs.iamb2, 
+jpeg("../figures/DAC/IAMB_Constrained.jpg",width = 800, height = "600")
+strength.plot(avg.arcs.iamb2_2.,arcs.iamb_2.2, 
+              fontsize = 15,
               shape="rectangle",
               highlight = list(#arcs = dag2,#
                 nodes="Direct access to care"))
+dev.off()
 
-arrows_table = subset(arcs.iamb2,from=="Direct access to care" | to=="Direct access to care")
-arrows_table= kable(arrows_table, 
-                    row.names=FALSE, 
-                    booktabs = T,
-                    linesep = "", 
-                    caption ="Strength and direction of the arcs connected to 'DAC'")
-kable_styling(arrows_table, font_size = 8, latex_options = "hold_position")
-set.seed(12345)
-arcs.iamb2 = boot.strength(as.data.frame(datad), 
-                           algorithm = "inter.iamb",
-                           R=1000,
-                           algorithm.args = list(blacklist = bl))
-arcs.iamb2 = arcs.iamb2[(arcs.iamb2$strength >=0.0), ]
-avg.arcs.iamb2 = averaged.network(arcs.iamb2, threshold=0.0)
+arcs.iamb_3.2 = arcs.iamb2[(arcs.iamb2$strength >=0.0), ]
 
-arrows_table = subset(arcs.iamb2,from=="Direct access to care" | to=="Direct access to care")
-arrows_table= kable(arrows_table, 
-                    row.names=FALSE, 
-                    booktabs = T,
-                    linesep = "", 
-                    caption ="Strength and direction of the arcs connected to 'DAC'")
-kable_styling(arrows_table, font_size = 13, latex_options = "hold_position")
+arrows_table.iamb.2 = subset(arcs.iamb_3.2,from=="Direct access to care" | to=="Direct access to care")
+arrows_table.iamb.2 %>%  
+  writexl::write_xlsx(.,"../figures/DAC/IAMB_Constrained.xlsx")
+
+
+# I.D. Synthetic graph
+
 
 # II. IAC -----
 #============#
