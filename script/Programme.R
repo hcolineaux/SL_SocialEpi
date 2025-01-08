@@ -406,104 +406,244 @@ arrows_table.iamb.2 %>%
   writexl::write_xlsx(.,"../figures/DAC/IAMB_Constrained.xlsx")
 
 
-# I.D. Synthetic graph
-
-
 # II. IAC -----
 #============#
 
-data = tot[,c(1:12)] 
+datad = tot[,c(1:12)] 
 
-## II.A CLASSICAL -----
-
-fit <- glm(data$`Indirect access to care` ~ data$Age + data$Gender + data$Origin + 
-             data$`Education level` + data$`Employment status` + data$Income +
-             data$`Health insurance status` + data$`Health relatives` + 
-             data$`Social integration` + data$`Chronic Disease` + 
-             data$`Perceived health status`, family = binomial(link = logit))
+## I.A. Non-Automated -----
+fit <- glm(datad$`Indirect access to care` ~ datad$Age + datad$Gender + datad$Origin + 
+             datad$`Education level` + datad$`Employment status` + datad$Income +
+             datad$`Health insurance status` + datad$`Health relatives` + 
+             datad$`Social integration` + datad$`Chronic Disease` + 
+             datad$`Perceived health status`, family = binomial(link = logit))
 summary(fit)
 summary(step(fit, direction = "backward"))
 
-fit_fin <- glm(data$`Indirect access to care` ~ data$Age + data$Gender + 
-                 data$`Education level` + data$Income + data$`Health relatives` +
-                 data$`Health insurance status` + data$`Chronic Disease` + 
-                 data$`Perceived health status`, family = binomial(link = logit))
+fit_fin <- glm(datad$`Indirect access to care` ~ datad$Age + datad$Gender + 
+                 datad$`Health insurance status` + datad$`Chronic Disease` + 
+                 datad$`Perceived health status`, family = binomial(link = logit))
 exp(cbind("Odds ratio" = coef(fit_fin), confint.default(fit_fin, level = 0.95)))
 
+### Initial -----
+dag_ini = matrix(c(    "Age", "Education level",
+                       "Gender", "Education level",
+                       "Origin", "Education level",
+                       
+                       "Age", "Employment status",
+                       "Gender", "Employment status",
+                       "Origin", "Employment status",
+                       "Education level", "Employment status",
+                       
+                       "Age", "Income",
+                       "Gender", "Income",
+                       "Origin", "Income",
+                       "Education level", "Income",               
+                       "Employment status", "Income",
+                       
+                       "Age", "Health insurance status",
+                       "Gender", "Health insurance status",
+                       "Origin", "Health insurance status",
+                       "Income", "Health insurance status",               
+                       "Employment status", "Health insurance status", 
+                       
+                       "Age", "Health relatives",
+                       "Gender", "Health relatives",
+                       "Origin", "Health relatives",
+                       "Education level", "Health relatives",
+                       
+                       "Age", "Social integration",
+                       "Gender", "Social integration",
+                       "Origin", "Social integration",
+                       "Education level", "Social integration",                
+                       "Employment status", "Social integration", 
+                       
+                       "Age", "Chronic Disease",
+                       "Gender", "Chronic Disease",
+                       "Origin", "Chronic Disease",
+                       "Education level", "Chronic Disease",                
+                       "Income", "Chronic Disease",
+                       
+                       "Age", "Perceived health status",
+                       "Gender", "Perceived health status",
+                       "Origin", "Perceived health status",
+                       "Employment status", "Perceived health status",
+                       "Income", "Perceived health status",
+                       "Chronic Disease", "Perceived health status",
+                       "Social integration", "Perceived health status",
+                       
+                       "Age", "Indirect access to care",
+                       "Gender", "Indirect access to care",
+                       "Origin", "Indirect access to care",
+                       "Education level", "Indirect access to care",     
+                       "Employment status", "Indirect access to care",     
+                       "Income", "Indirect access to care",     
+                       "Health insurance status", "Indirect access to care",
+                       "Health relatives","Indirect access to care",
+                       "Social integration", "Indirect access to care",
+                       "Perceived health status", "Indirect access to care",               
+                       "Chronic Disease", "Indirect access to care"),
+                 ncol = 2, byrow = TRUE, dimnames = list(NULL, c("from", "to")))
 
-## II.B DATA DRIVEN -----
+dagg_ini = empty.graph(names(datad))
+arcs(dagg_ini)=dag_ini
+
+jpeg("../figures/IAC/0.DAG_ini.jpg", width = 800, height = "800")
+graphviz.plot(dagg_ini, 
+              main = "Initial network",
+              shape="rectangle", 
+              fontsize = 15,
+              highlight = list(#arcs = dag2,#
+                nodes="Indirect access to care"))
+dev.off()
+
+### Final -----
+dag_final = matrix(c( "Age", "Education level",
+                      "Gender", "Education level",
+                      "Origin", "Education level",
+                      
+                      "Age", "Employment status",
+                      "Gender", "Employment status",
+                      "Origin", "Employment status",
+                      "Education level", "Employment status",
+                      
+                      "Age", "Income",
+                      "Gender", "Income",
+                      "Origin", "Income",
+                      "Education level", "Income",               
+                      "Employment status", "Income",
+                      
+                      "Age", "Health insurance status",
+                      "Gender", "Health insurance status",
+                      "Origin", "Health insurance status",
+                      "Income", "Health insurance status",               
+                      "Employment status", "Health insurance status", 
+                      
+                      "Origin", "Health relatives",
+                      "Education level", "Health relatives",
+                      
+                      "Age", "Social integration",
+                      "Gender", "Social integration",
+                      "Education level", "Social integration",                
+                      "Employment status", "Social integration", 
+                      
+                      "Age", "Chronic Disease",
+                      "Origin", "Chronic Disease",
+                      
+                      "Age", "Perceived health status",
+                      "Origin", "Perceived health status",
+                      "Employment status", "Perceived health status",
+                      "Income", "Perceived health status",
+                      "Chronic Disease", "Perceived health status",
+                      "Social integration", "Perceived health status",
+                      
+                      "Age", "Indirect access to care",
+                      "Gender", "Indirect access to care",
+                      "Health insurance status", "Indirect access to care",
+                      "Perceived health status", "Indirect access to care",               
+                      "Chronic Disease", "Indirect access to care"),
+                   ncol = 2, byrow = TRUE, dimnames = list(NULL, c("from", "to")))
+
+dagg_final = empty.graph(names(datad))
+arcs(dagg_final)=dag_final
+
+jpeg("../figures/IAC/0.DAG_final.jpg", width = 800, height = "800")
+graphviz.plot(dagg_final, 
+              main = "Final network",
+              shape="rectangle", 
+              fontsize = 15,
+              highlight = list(#arcs = dag2,#
+                nodes="Indirect access to care"))
+dev.off()
+
+jpeg("../figures/IAC/0.DAG_ini_to_final.jpg", width = 800, height = "600")
+set.seed(12345)
+graphviz.plot(dagg_ini, 
+              main = "",
+              shape="rectangle", 
+              fontsize = 15,
+              highlight = list(arcs = dag_final, col = "black", lwd=2, lty="solid"))
+dev.off()
+
+fit = bn.fit(dagg_ini, as.data.frame(datad))
+AIC_dag2 = AIC(fit, as.data.frame(datad))
+
+## I.B DATA DRIVEN -----
+
 ### Hill-climbing -----
 
 set.seed(12345)
-arcs.hc = boot.strength(as.data.frame(data), 
+arcs.hc = boot.strength(as.data.frame(datad), 
                         algorithm = "hc",
-                        R=100, 
+                        R=1000, 
                         algorithm.args = list(score="bic"))
-arcs.hc= arcs.hc[(arcs.hc$strength >=0.05), ]
-avg.arcs.hc = averaged.network(arcs.hc, threshold=0.05)
+# plot(arcs.hc)
 
+arcs.hc_2= arcs.hc[(arcs.hc$strength >=0.05), ]
+avg.arcs.hc_2 = averaged.network(arcs.hc_2, threshold=0.05)
 
-strength.plot(avg.arcs.hc,arcs.hc, 
+jpeg("../figures/IAC/Hill_climbing_DataDriven.jpg",width = 800, height = "600")
+strength.plot(avg.arcs.hc_2,arcs.hc_2, 
+              fontsize = 15,
               shape="rectangle",
               highlight = list(#arcs = dag2,#
                 nodes="Indirect access to care"))
+dev.off()
 
-arrows_table = subset(arcs.hc,from=="Indirect access to care" | to=="Indirect access to care")
-arrows_table= kable(arrows_table,
-                    row.names=FALSE,
-                    booktabs = T,
-                    linesep = "",
-                    caption ="Strength and direction of the arcs connected to 'DAC'")
-kable_styling(arrows_table, font_size = 8, latex_options = "hold_position")
-
+arcs.hc_3= arcs.hc[(arcs.hc$strength >=0.00), ]
+avg.arcs.hc_3 = averaged.network(arcs.hc_3, threshold=0.00)
+arrows_table.hc = subset(arcs.hc_3,from=="Indirect access to care" | to=="Indirect access to care")
+arrows_table.hc %>%  
+  writexl::write_xlsx(.,"../figures/IAC/Hill_climbing_DataDriven.xlsx")
 
 ### Interleaved Incremental Association -----
 
 set.seed(12345)
-arcs.iamb = boot.strength(as.data.frame(data), 
+arcs.iamb = boot.strength(as.data.frame(datad), 
                           algorithm = "inter.iamb",
-                          R=100)
-arcs.iamb = arcs.iamb[(arcs.iamb$strength >=0.05), ]
-avg.arcs.iamb = averaged.network(arcs.iamb, threshold=0.05)
+                          R=1000)
+arcs.iamb_2 = arcs.iamb[(arcs.iamb$strength >=0.05), ]
+avg.arcs.iamb_2 = averaged.network(arcs.iamb_2, threshold=0.05)
 
-strength.plot(avg.arcs.iamb,arcs.iamb, 
+jpeg("../figures/IAC/IAMB_DataDriven.jpg",width = 800, height = "600")
+strength.plot(avg.arcs.iamb_2,arcs.iamb_2, 
+              fontsize = 15,
               shape="rectangle",
               highlight = list(#arcs = dag2,#
                 nodes="Indirect access to care"))
+dev.off()
 
-arrows_table = subset(arcs.iamb,from=="Indirect access to care" | to=="Indirect access to care")
-arrows_table= kable(arrows_table, 
-                    row.names=FALSE, 
-                    booktabs = T,
-                    linesep = "", 
-                    caption ="Strength and direction of the arcs connected to 'DAC'")
-kable_styling(arrows_table, font_size = 8, latex_options = "hold_position")
+# fit.iamb = bn.fit(avg.arcs.iamb_2, as.data.frame(datad))
+# fit_table = data.frame(fit.iamb[["Indirect access to care"]][["prob"]])
 
+arcs.iamb_3 = arcs.iamb[(arcs.iamb$strength >=0.00), ]
+arrows_table.iamb = subset(arcs.iamb_3,from=="Indirect access to care" | to=="Indirect access to care")
+arrows_table.iamb %>%  
+  writexl::write_xlsx(.,"../figures/IAC/IAMB_DataDriven.xlsx")
 
-### ARACNE-----
+### ARACNE -----
 
 set.seed(12345)
-arcs.arac = boot.strength(as.data.frame(data), 
+arcs.arac = boot.strength(as.data.frame(datad), 
                           algorithm = "aracne",
-                          R=100)
-arcs.arac = arcs.arac[(arcs.arac$strength >=0.05),]
-avg.arcs.arac = averaged.network(arcs.arac, threshold=0.05)
+                          R=1000)
+arcs.arac_2 = arcs.arac[(arcs.arac$strength >=0.05),]
+avg.arcs.arac_2 = averaged.network(arcs.arac_2, threshold=0.05)
 
-strength.plot(avg.arcs.arac,arcs.arac,
+jpeg("../figures/IAC/ARACNE_DataDriven.jpg",width = 800, height = "600")
+strength.plot(avg.arcs.arac_2,arcs.arac_2, 
+              fontsize = 15,
               shape="rectangle",
               highlight = list(#arcs = dag2,#
                 nodes="Indirect access to care"))
+dev.off()
 
-arrows_table = subset(arcs.arac,from=="Indirect access to care" | to=="Indirect access to care")
-arrows_table= kable(arrows_table,
-                    row.names=FALSE,
-                    booktabs = T,
-                    linesep = "",
-                    caption ="Strength of the arcs connected to 'DAC'")
-kable_styling(arrows_table, font_size = 8, latex_options = "hold_position")
+arcs.arac_3 = arcs.arac[(arcs.arac$strength >=0.00),]
+arrows_table.aracne = subset(arcs.arac_3,from=="Indirect access to care" | to=="Indirect access to care")
+arrows_table.aracne %>%  
+  writexl::write_xlsx(.,"../figures/IAC/ARACNE_DataDriven.xlsx")
 
-
-## II.C CONSTRAINED -----
+## I.C CONSTRAINED -----
 
 ### blacklist -----
 bl = matrix(c( "Gender", "Age",
@@ -551,52 +691,48 @@ bl = matrix(c( "Gender", "Age",
 ### Hill-Climbing -----
 
 set.seed(12345)
-arcs.hc2 = boot.strength(as.data.frame(data), 
+arcs.hc2 = boot.strength(as.data.frame(datad), 
                          algorithm = "hc",
-                         R=100, 
+                         R=1000, 
                          algorithm.args = list(score="bic", blacklist = bl))
-arcs.hc2= arcs.hc2[(arcs.hc2$strength >=0.05), ]
-avg.arcs.hc2 = averaged.network(arcs.hc2, threshold=0.05)
+arcs.hc_2.2= arcs.hc2[(arcs.hc2$strength >=0.05), ]
+avg.arcs.hc_2.2 = averaged.network(arcs.hc_2.2, threshold=0.05)
 
-strength.plot(avg.arcs.hc2,arcs.hc2, 
+jpeg("../figures/IAC/Hill_climbing_Constrained.jpg",width = 800, height = "600")
+strength.plot(avg.arcs.hc_2.2,arcs.hc_2.2, 
+              fontsize = 15,
               shape="rectangle",
               highlight = list(#arcs = dag2,#
                 nodes="Indirect access to care"))
+dev.off()
 
-
-arrows_table = subset(arcs.hc2,from=="Indirect access to care" | to=="Indirect access to care")
-arrows_table= kable(arrows_table, 
-                    row.names=FALSE, 
-                    booktabs = T,
-                    linesep = "", 
-                    caption ="Strength and direction of the arcs connected to 'DAC'")
-kable_styling(arrows_table, 
-              font_size = 8,
-              latex_options = "hold_position")
+arcs.hc_3.2= arcs.hc2[(arcs.hc2$strength >=0.0), ]
+arrows_table.hc.2 = subset(arcs.hc_3.2,from=="Indirect access to care" | to=="Indirect access to care")
+arrows_table.hc.2 %>%  
+  writexl::write_xlsx(.,"../figures/IAC/Hill_climbing_Constrained.xlsx")
 
 ### Interleaved Incremental Association -----
 
 set.seed(12345)
-arcs.iamb2 = boot.strength(as.data.frame(data), 
+arcs.iamb2 = boot.strength(as.data.frame(datad), 
                            algorithm = "inter.iamb",
-                           R=100,
+                           R=1000,
                            algorithm.args = list(blacklist = bl))
-arcs.iamb2 = arcs.iamb2[(arcs.iamb2$strength >=0.05), ]
-avg.arcs.iamb2 = averaged.network(arcs.iamb2, threshold=0.05)
+arcs.iamb_2.2 = arcs.iamb2[(arcs.iamb2$strength >=0.05), ]
+avg.arcs.iamb2_2. = averaged.network(arcs.iamb_2.2, threshold=0.05)
 
-
-strength.plot(avg.arcs.iamb2,arcs.iamb2, 
+jpeg("../figures/IAC/IAMB_Constrained.jpg",width = 800, height = "600")
+strength.plot(avg.arcs.iamb2_2.,arcs.iamb_2.2, 
+              fontsize = 15,
               shape="rectangle",
               highlight = list(#arcs = dag2,#
                 nodes="Indirect access to care"))
+dev.off()
 
-arrows_table = subset(arcs.iamb2,from=="Indirect access to care" | to=="Indirect access to care")
-arrows_table= kable(arrows_table, 
-                    row.names=FALSE, 
-                    booktabs = T,
-                    linesep = "", 
-                    caption ="Strength and direction of the arcs connected to 'DAC'")
-kable_styling(arrows_table, font_size = 8, latex_options = "hold_position")
+arcs.iamb_3.2 = arcs.iamb2[(arcs.iamb2$strength >=0.0), ]
 
+arrows_table.iamb.2 = subset(arcs.iamb_3.2,from=="Indirect access to care" | to=="Indirect access to care")
+arrows_table.iamb.2 %>%  
+  writexl::write_xlsx(.,"../figures/IAC/IAMB_Constrained.xlsx")
 
 
